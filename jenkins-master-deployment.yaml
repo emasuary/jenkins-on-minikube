@@ -1,0 +1,65 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f ./docker-compose.yml
+      convert
+    kompose.version: 1.13.0 ()
+  creationTimestamp: null
+  labels:
+    io.kompose.service: jenkins-master
+  name: jenkins-master
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: jenkins-master
+    spec:
+      containers:
+      - env:
+        - name: JAVA_OPTS_LOAD_STATS_CLOCK
+        - name: JAVA_OPTS_MEM
+          value: -Xmx1g
+        - name: JENKINS_ADMIN_PASSWORD
+          value: admin
+        - name: JENKINS_ENV_ADMIN_USER
+          value: admin
+        - name: JENKINS_ENV_CONFIG_YML_URL
+          value: file://config/config.yml
+        - name: JENKINS_ENV_HOST_IP
+        - name: JENKINS_ENV_QUIET_STARTUP_PERIOD
+          value: "120"
+        image: odavid/my-bloody-jenkins
+        name: jenkins-master
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        resources: {}
+        volumeMounts:
+        - mountPath: /config
+          name: jenkins-master-claim0
+        - mountPath: /var/jenkins-home
+          name: jenkins-master-claim1
+        - mountPath: /jenkins-workspace-home
+          name: jenkins-master-claim2
+        - mountPath: /var/run/docker.sock
+          name: jenkins-master-claim3
+      restartPolicy: Always
+      volumes:
+      - name: jenkins-master-claim0
+        persistentVolumeClaim:
+          claimName: jenkins-master-claim0
+      - name: jenkins-master-claim1
+        persistentVolumeClaim:
+          claimName: jenkins-master-claim1
+      - name: jenkins-master-claim2
+        persistentVolumeClaim:
+          claimName: jenkins-master-claim2
+      - name: jenkins-master-claim3
+        persistentVolumeClaim:
+          claimName: jenkins-master-claim3
+status: {}

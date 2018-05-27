@@ -1,0 +1,86 @@
+security:
+  realm: jenkins_database
+  adminPassword: ${JENKINS_ADMIN_PASSWORD}
+
+  remove_master_envvars:
+  - '.*PASSWORD.*'
+
+tools:
+  installations:
+    MVN-3.5.0:
+      type: maven
+      installers:
+        - id: '3.5.0'
+clouds:
+  docker-cloud:
+    type: docker
+    dockerHostUri: 'unix:///var/run/docker.sock'
+    templates:
+      - name: docker-slave
+        image: odavid/jenkins-jnlp-slave:latest
+        labels:
+          - generic
+        remoteFs: /home/jenkins
+        jvmArgs: -Xmx1g
+        volumes:
+          - '/var/run/docker.sock:/var/run/docker.sock'
+        instanceCap: '10'
+credentials:
+  slack:
+    type: text
+    description: The slack secret token
+    text: sfsdfsdfsdfeasdfasaa
+  # aws-ecr-key:
+  #   type: aws
+  #   access_key: AKIAK678KWE8BABZJU2A # not real ;
+  #   secret_access_key: 9ERklgz0DIDl0K3EEw+5se2HRZJc+dhJ329U1m3o # not real ;
+  dockerHub:
+    type: userpass
+    username: tikalwm
+    password: XsUV4D9r3M
+  gitsshkey:
+    type: sshkey
+    description: gitsshkey
+    username: shelleg
+    passphrase: my-ssh-key-passphrase
+    privatekey: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpQIBAAKCAQEA2m3BuAqXrJD3uzWy6yZmr5gycIYd160+33lCvSEXSvUeh9IX
+      LHzSP1MTtFbOdCl2AJptdct5e5RrZaFNiPBlsrCCJnYNbuISMT4uk5dKI8MJVFft
+      g2lDfScDGI7RXnzZlSdMr6EerelsiRRXIr5q2dOiBJjGi4JfKQ+bmPUccxcdAOQF
+      UGJVffy+YJsm03qB/hMZkzfTPj+N8NbrcqevgPHlWRZ3VPP4/Dpyw/l+5Le4I4VT
+      AOvePHfc1QjcVqQ0BktplOoEZBvzzfxAsJuVbeATh+LlrGf7+mV/WmqwmVN/DcbH
+      +pHgOI7A38vJvIiJo+YHUeXrg+6TTaYDNeWlLQIDAQABAoIBACx3t75d+a7Z/HUS
+      Y5BXywPoeixKQX0M+gXIy/tw5ysNZ9/Ct5EJAEx//zzxhypC3pEU3z/h4qNz/cE8
+      62n7dti/8l8eHXH7eDSqMhU98YwCQr33AJWGMoUiEhFH0fvocutYitYeeP5yzPPD
+      PlIGbf5WhV9mMtVn/zN+x/CFxfrv0xXTsFK7+GCuxMonmgwQLrkcrL1Huu6CEMOq
+      cySrCD6fola0dSlZfvdhes5nDjh8TzypnY18flyS/Gekkgg/iv9nvIFWb54vAfbF
+      d2708zc12kV4/ZP+jnxmfzNg7IGN54/Fi7O1B8feOp2bjwM0aNr3BaDmr+geog/D
+      zV/t9IECgYEA/73oXG0Fvtk1DoB9VcAvbUzKHD6ivAn6mVE5ecaCgAqdth4wNZV0
+      luc2VCeidIAaDrkh6El7ziS2Q25nO0atGIA3AgBpjIGW89zvKJ5fKOJC6STYmaPB
+      fjDJ+xkLbYFA8TYr1NIsLtywc514DsSXOSka3/6EwQ3m9cckGIc/il0CgYEA2qY0
+      wkjIBGwT/JucB0Ryg+q+fzFEsNpz3SSjVpi5X1KQzHI4kuo8Gwh1edSZuXgGAkYH
+      42KNHZ5jckjfOjOV4SzrnRe5+WOGQ2jA/gt5g4dpGb67fivMoH+j0DO1TRnKnihm
+      4o5E2oSfW3/WxO5vzCLXHYDPP5cZQ66JCFnt+RECgYEAzgD0xlbPtP8UXP0leMiZ
+      q4qal4vg3GWRZqTmDnDYODnU9pl0rgUY6GGRAtL2aq+xzcBVTt66isBJzSGGqFnz
+      HvRQ2xzn6NWOehuyzl5cOvufeFxE2eXt/C9i1BBFg00Fugev4Pv3uTvuKwNibUrw
+      oYu56UsFNtly/PIP4m43wcUCgYEA0B62R1wZr0PkvmSr3qsDSZeu3cjatnApKw0N
+      wIa8pAQmOcRbH1SAA8dIcr+v1z9skMtyBLkw00mJJSZB/NdPSbeFSdFkvwJBsXZL
+      hUUM0+qXWt8W/mDYdMkp9yrQ3uO23lZcoDeFSG5GdUS4/Fhs5+Ud10JdgwzjCm5e
+      lylqf9ECgYEArIPktzn/vPZtE9en1vhIgDFp1pALt0XIFxOstec/0whQzUUYTaeD
+      SAv+Y2pwWb6gZvJzXCotyh7THTglMVHS46yQTCit35iog7AM4oo801KNOFxlb92c
+      /vN5VG6b0/M2CAt9wkeiUaQi/7Aj2P06n65oLVaVMVsaMLMt9a2FZgk=
+      -----END RSA PRIVATE KEY-----
+notifiers:
+seed_jobs:
+  seed-job:
+    source: 
+      remote: https://github.com/shelleg/docker-gitbook
+      branch: 'jenkinsfile'
+    triggers: 
+      pollScm: 'H/2 * * * *'
+      periodic: '@hourly'
+    pipeline: ./jenkinsfile
+    executeWhen: always #firstTimeOnly always never
+
+
